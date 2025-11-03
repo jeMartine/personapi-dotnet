@@ -2,6 +2,11 @@
 
 Este proyecto contiene una API en .NET 7 (`personapi-dotnet`) conectada a una base de datos SQL Server, con Docker Compose para levantar ambos servicios de manera sencilla.
 
+## Archivos DDL y DML
+  -[persona DDl](https://github.com/jeMartine/personapi-dotnet/blob/main/ddl_persona_db.sql)
+  -[persona DML](https://github.com/jeMartine/personapi-dotnet/blob/main/dml_persona_db.sql)
+
+
 ## Requisitos
 
 - [Docker](https://www.docker.com/get-started) instalado
@@ -10,7 +15,7 @@ Este proyecto contiene una API en .NET 7 (`personapi-dotnet`) conectada a una ba
 ## Clonar el proyecto
 
 ```bash
-git https://github.com/jeMartine/personapi-dotnet
+git clone https://github.com/jeMartine/personapi-dotnet
 cd personapi-dotnet
 ```
 
