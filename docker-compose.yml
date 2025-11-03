@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  sqlserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    container_name: docker_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Admin123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+
+    networks:
+      - app-network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Admin123!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+
+
+  webapi:
+    build:
+      context: ./personapi-dotnet
+      dockerfile: Dockerfile
+    container_name: personapi
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=persona_db;User Id=sa;Password=Admin123!;TrustServerCertificate=True;
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
+
+
+# Define el volumen para almacenamiento persistente de datos
+volumes:
+  sqlserver_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
