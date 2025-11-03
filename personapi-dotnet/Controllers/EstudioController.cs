@@ -21,8 +21,13 @@ namespace personapi_dotnet.Controllers
         // GET: Estudio
         public async Task<IActionResult> Index()
         {
-            var persona_dbContext = _context.Estudios.Include(e => e.CcPerNavigation).Include(e => e.IdProfNavigation);
-            return View(await persona_dbContext.ToListAsync());
+            var estudios = await _context.Estudios
+                .Include(e => e.CcPerNavigation)
+                .Include(e => e.IdProfNavigation)
+                .ToListAsync();
+
+            ViewBag.TotalEstudios = estudios.Count;
+            return View(estudios);
         }
 
         // GET: Estudio/Details/5

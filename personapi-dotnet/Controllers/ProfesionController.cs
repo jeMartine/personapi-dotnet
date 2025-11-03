@@ -21,9 +21,11 @@ namespace personapi_dotnet.Controllers
         // GET: Profesion
         public async Task<IActionResult> Index()
         {
-              return _context.Profesions != null ? 
-                          View(await _context.Profesions.ToListAsync()) :
-                          Problem("Entity set 'persona_dbContext.Profesions'  is null.");
+            var profesions = await _context.Profesions
+                .Include(p => p.Estudios)
+                .ToListAsync();
+            ViewBag.TotalProfesions = profesions.Count;
+            return View(profesions);
         }
 
         // GET: Profesion/Details/5
@@ -55,8 +57,10 @@ namespace personapi_dotnet.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nom,Des")] Profesion profesion)
+        public async Task<IActionResult> Create([Bind("Nom,Des")] Profesion profesion)
         {
+            profesion.Id = _context.Profesions.Any() ? _context.Profesions.Max(p => p.Id) + 1 : 1;
+
             if (ModelState.IsValid)
             {
                 _context.Add(profesion);

@@ -49,6 +49,14 @@ namespace personapi_dotnet.Controllers.ApiControllers
             return persona;
         }
 
+        // GET: api/PersonaApi/count
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetTotalCount()
+        {
+            var total = await _context.Personas.CountAsync();
+            return Ok(total);
+        }
+
         // PUT: api/PersonaApi/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

@@ -21,8 +21,11 @@ namespace personapi_dotnet.Controllers
         // GET: Telefono
         public async Task<IActionResult> Index()
         {
-            var persona_dbContext = _context.Telefonos.Include(t => t.DuenioNavigation);
-            return View(await persona_dbContext.ToListAsync());
+            var telefonos = await _context.Telefonos
+                .Include(t => t.DuenioNavigation)
+                .ToListAsync();
+            ViewBag.TotalTelefonos = telefonos.Count;
+            return View(telefonos);
         }
 
         // GET: Telefono/Details/5

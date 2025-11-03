@@ -21,9 +21,13 @@ namespace personapi_dotnet.Controllers
         // GET: Persona
         public async Task<IActionResult> Index()
         {
-              return _context.Personas != null ? 
-                          View(await _context.Personas.ToListAsync()) :
-                          Problem("Entity set 'persona_dbContext.Personas'  is null.");
+            var personas = await _context.Personas
+                .Include(p => p.Estudios)
+                .Include(p => p.Telefonos)
+                .ToListAsync();
+
+            ViewBag.TotalPersonas = personas.Count;
+            return View(personas);
         }
 
         // GET: Persona/Details/5

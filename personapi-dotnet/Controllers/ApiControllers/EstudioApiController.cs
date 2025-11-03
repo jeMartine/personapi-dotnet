@@ -49,6 +49,14 @@ namespace personapi_dotnet.Controllers.ApiControllers
             return estudio;
         }
 
+        // GET: api/EstudioApi/count
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetTotalCount()
+        {
+            var total = await _context.Estudios.CountAsync();
+            return Ok(total);
+        }
+
         // PUT: api/EstudioApi/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
