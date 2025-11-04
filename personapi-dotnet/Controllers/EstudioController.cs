@@ -5,43 +5,47 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
 
 namespace personapi_dotnet.Controllers
 {
     public class EstudioController : Controller
     {
-        private readonly persona_dbContext _context;
+        private readonly IEstudioRepository _estudioRepo;
+        private readonly IPersonaRepository _personaRepo;
+        private readonly IProfesionRepository _profesionRepo;
 
-        public EstudioController(persona_dbContext context)
+        public EstudioController
+            (
+            IEstudioRepository estudioRepo,
+            IPersonaRepository personaRepo,
+            IProfesionRepository profesionRepo
+            )
         {
-            _context = context;
+            _estudioRepo = estudioRepo;
+            _personaRepo = personaRepo;
+            _profesionRepo = profesionRepo;
         }
 
         // GET: Estudio
         public async Task<IActionResult> Index()
         {
-            var estudios = await _context.Estudios
-                .Include(e => e.CcPerNavigation)
-                .Include(e => e.IdProfNavigation)
-                .ToListAsync();
-
-            ViewBag.TotalEstudios = estudios.Count;
+            var estudios = await _estudioRepo.GetEstudiosAsync();
+            ViewBag.TotalEstudios = estudios.Count();
             return View(estudios);
         }
 
         // GET: Estudio/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Estudios == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var estudio = await _context.Estudios
-                .Include(e => e.CcPerNavigation)
-                .Include(e => e.IdProfNavigation)
-                .FirstOrDefaultAsync(m => m.IdProf == id);
+            var estudio = await _estudioRepo.GetEstudioByIdAsync(id.Value);
+
             if (estudio == null)
             {
                 return NotFound();
@@ -53,8 +57,8 @@ namespace personapi_dotnet.Controllers
         // GET: Estudio/Create
         public IActionResult Create()
         {
-            ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Cc");
-            ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Id");
+            ViewData["CcPer"] = new SelectList(_personaRepo.GetPersonas(), "Cc", "Cc");
+            ViewData["IdProf"] = new SelectList(_profesionRepo.GetProfesiones(), "Id", "Id");
             return View();
         }
 
@@ -65,32 +69,37 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdProf,CcPer,Fecha,Univer")] Estudio estudio)
         {
+            if (await _estudioRepo.ExistsAsync(estudio.CcPer, estudio.IdProf))
+            {
+                ModelState.AddModelError(string.Empty, $"Person identified with CC: {estudio.CcPer} is already related with profession: {estudio.IdProf}");
+
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(estudio);
-                await _context.SaveChangesAsync();
+                await _estudioRepo.CreateEstudioAsync(estudio);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Cc", estudio.CcPer);
-            ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Id", estudio.IdProf);
+            ViewData["CcPer"] = new SelectList(await _personaRepo.GetPersonasAsync(), "Cc", "Cc", estudio.CcPer);
+            ViewData["IdProf"] = new SelectList(await _profesionRepo.GetProfesionesAsync(), "Id", "Id", estudio.IdProf);
             return View(estudio);
         }
 
         // GET: Estudio/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Estudios == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var estudio = await _context.Estudios.FindAsync(id);
+            var estudio = await _estudioRepo.GetEstudioByIdAsync(id.Value);
             if (estudio == null)
             {
                 return NotFound();
             }
-            ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Cc", estudio.CcPer);
-            ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Id", estudio.IdProf);
+            ViewData["CcPer"] = new SelectList(await _personaRepo.GetPersonasAsync(), "Cc", "Cc", estudio.CcPer);
+            ViewData["IdProf"] = new SelectList(await _profesionRepo.GetProfesionesAsync(), "Id", "Id", estudio.IdProf);
             return View(estudio);
         }
 
@@ -110,12 +119,12 @@ namespace personapi_dotnet.Controllers
             {
                 try
                 {
-                    _context.Update(estudio);
-                    await _context.SaveChangesAsync();
+                    _estudioRepo.UpdateEstudio(estudio);
+                    _estudioRepo.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EstudioExists(estudio.IdProf))
+                    if (!_estudioRepo.EstudioExists(estudio.IdProf))
                     {
                         return NotFound();
                     }
@@ -126,23 +135,20 @@ namespace personapi_dotnet.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CcPer"] = new SelectList(_context.Personas, "Cc", "Cc", estudio.CcPer);
-            ViewData["IdProf"] = new SelectList(_context.Profesions, "Id", "Id", estudio.IdProf);
+            ViewData["CcPer"] = new SelectList(await _personaRepo.GetPersonasAsync(), "Cc", "Cc", estudio.CcPer);
+            ViewData["IdProf"] = new SelectList(await _profesionRepo.GetProfesionesAsync(), "Id", "Id", estudio.IdProf);
             return View(estudio);
         }
 
         // GET: Estudio/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Estudios == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var estudio = await _context.Estudios
-                .Include(e => e.CcPerNavigation)
-                .Include(e => e.IdProfNavigation)
-                .FirstOrDefaultAsync(m => m.IdProf == id);
+            var estudio = await _estudioRepo.GetEstudioByIdAsync(id.Value);
             if (estudio == null)
             {
                 return NotFound();
@@ -156,23 +162,14 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Estudios == null)
-            {
-                return Problem("Entity set 'persona_dbContext.Estudios'  is null.");
-            }
-            var estudio = await _context.Estudios.FindAsync(id);
+            var estudio = await _estudioRepo.GetEstudioByIdAsync(id);
             if (estudio != null)
             {
-                _context.Estudios.Remove(estudio);
+                _estudioRepo.DeleteEstudio(estudio);
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool EstudioExists(int id)
-        {
-          return (_context.Estudios?.Any(e => e.IdProf == id)).GetValueOrDefault();
+            _estudioRepo.SaveChanges();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

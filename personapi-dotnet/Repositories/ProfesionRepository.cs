@@ -1,4 +1,6 @@
-﻿using personapi_dotnet.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using personapi_dotnet.Interfaces;
+using personapi_dotnet.Data;
 using personapi_dotnet.Models.Entities;
 
 namespace personapi_dotnet.Repositories
@@ -15,6 +17,13 @@ namespace personapi_dotnet.Repositories
             _context.Profesions.Add(profesion);
         }
 
+        // async
+        public async Task CreateProfesionAsync(Profesion profesion)
+        {
+            await _context.Profesions.AddAsync(profesion);
+            await _context.SaveChangesAsync();
+        }
+
         public void DeleteProfesion(Profesion profesion)
         {
             _context.Profesions.Remove(profesion);
@@ -25,9 +34,27 @@ namespace personapi_dotnet.Repositories
             return _context.Profesions.FirstOrDefault(p => p.Id == id)!;
         }
 
-        public ICollection<Profesion> GetProfesiones()
+        // async
+        public async Task<Profesion?> GetProfesionByIdAsync(int id)
+        {
+            return await _context.Profesions
+                .Include(p => p.Estudios)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public IEnumerable<Profesion> GetProfesiones()
         {
             return _context.Profesions.ToList();
+        }
+
+        // async
+        public async Task<IEnumerable<Profesion>> GetProfesionesAsync()
+        {
+            return await _context.Profesions
+                .Include(p => p.Estudios)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public bool ProfesionExists(int id)

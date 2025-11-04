@@ -45,9 +45,9 @@
                 @Html.DisplayFor(modelItem => item.IdProfNavigation.Id)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                @Html.ActionLink("Edit", "Edit", new { id = item.IdProf }) |
+                @Html.ActionLink("Details", "Details", new { id = item.IdProf }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.IdProf })
             </td>
         </tr>
 }

@@ -5,40 +5,43 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
 
 namespace personapi_dotnet.Controllers
 {
     public class TelefonoController : Controller
     {
-        private readonly persona_dbContext _context;
+        private readonly ITelefonoRepository _telefonoRepo;
+        private readonly IPersonaRepository _personaRepo;
 
-        public TelefonoController(persona_dbContext context)
+        public TelefonoController
+            (
+            ITelefonoRepository telefonoRepo,
+            IPersonaRepository personaRepo
+            )
         {
-            _context = context;
+            _telefonoRepo = telefonoRepo;
+            _personaRepo = personaRepo;
         }
 
         // GET: Telefono
         public async Task<IActionResult> Index()
         {
-            var telefonos = await _context.Telefonos
-                .Include(t => t.DuenioNavigation)
-                .ToListAsync();
-            ViewBag.TotalTelefonos = telefonos.Count;
+            var telefonos = await _telefonoRepo.GetTelefonosAsync();
+            ViewBag.TotalTelefonos = telefonos.Count();
             return View(telefonos);
         }
 
         // GET: Telefono/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            if (id == null || _context.Telefonos == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var telefono = await _context.Telefonos
-                .Include(t => t.DuenioNavigation)
-                .FirstOrDefaultAsync(m => m.Num == id);
+            var telefono = await _telefonoRepo.GetTelefonoByIdAsync(id);
             if (telefono == null)
             {
                 return NotFound();
@@ -50,7 +53,7 @@ namespace personapi_dotnet.Controllers
         // GET: Telefono/Create
         public IActionResult Create()
         {
-            ViewData["Duenio"] = new SelectList(_context.Personas, "Cc", "Cc");
+            ViewData["Duenio"] = new SelectList(_personaRepo.GetPersonas(), "Cc", "Cc");
             return View();
         }
 
@@ -63,28 +66,28 @@ namespace personapi_dotnet.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(telefono);
-                await _context.SaveChangesAsync();
+                await _telefonoRepo.CreateTelefonoAsync(telefono);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Duenio"] = new SelectList(_context.Personas, "Cc", "Cc", telefono.Duenio);
+            ViewData["Duenio"] = new SelectList(await _personaRepo.GetPersonasAsync(), "Cc", "Cc", telefono.Duenio);
             return View(telefono);
         }
 
         // GET: Telefono/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null || _context.Telefonos == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var telefono = await _context.Telefonos.FindAsync(id);
+            var telefono = await _telefonoRepo.GetTelefonoByIdAsync(id);
+
             if (telefono == null)
             {
                 return NotFound();
             }
-            ViewData["Duenio"] = new SelectList(_context.Personas, "Cc", "Cc", telefono.Duenio);
+            ViewData["Duenio"] = new SelectList(await _personaRepo.GetPersonasAsync(), "Cc", "Cc", telefono.Duenio);
             return View(telefono);
         }
 
@@ -104,12 +107,12 @@ namespace personapi_dotnet.Controllers
             {
                 try
                 {
-                    _context.Update(telefono);
-                    await _context.SaveChangesAsync();
+                    _telefonoRepo.UpdateTelefono(telefono);
+                    _telefonoRepo.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TelefonoExists(telefono.Num))
+                    if (!_telefonoRepo.TelefonoExists(telefono.Num))
                     {
                         return NotFound();
                     }
@@ -120,21 +123,20 @@ namespace personapi_dotnet.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Duenio"] = new SelectList(_context.Personas, "Cc", "Cc", telefono.Duenio);
+            ViewData["Duenio"] = new SelectList(await _personaRepo.GetPersonasAsync(), "Cc", "Cc", telefono.Duenio);
             return View(telefono);
         }
 
         // GET: Telefono/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null || _context.Telefonos == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var telefono = await _context.Telefonos
-                .Include(t => t.DuenioNavigation)
-                .FirstOrDefaultAsync(m => m.Num == id);
+            var telefono = await _telefonoRepo.GetTelefonoByIdAsync(id);
+
             if (telefono == null)
             {
                 return NotFound();
@@ -148,23 +150,15 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            if (_context.Telefonos == null)
-            {
-                return Problem("Entity set 'persona_dbContext.Telefonos'  is null.");
-            }
-            var telefono = await _context.Telefonos.FindAsync(id);
+            var telefono = await _telefonoRepo.GetTelefonoByIdAsync(id);
+
             if (telefono != null)
             {
-                _context.Telefonos.Remove(telefono);
+                _telefonoRepo.DeleteTelefono(telefono);
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool TelefonoExists(string id)
-        {
-          return (_context.Telefonos?.Any(e => e.Num == id)).GetValueOrDefault();
+            _telefonoRepo.SaveChanges();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

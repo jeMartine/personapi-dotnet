@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace personapi_dotnet.Models.Entities
 {
@@ -10,7 +11,7 @@ namespace personapi_dotnet.Models.Entities
         public DateTime? Fecha { get; set; }
         public string? Univer { get; set; }
 
-        public virtual Persona CcPerNavigation { get; set; } = null!;
-        public virtual Profesion IdProfNavigation { get; set; } = null!;
+        public virtual Persona? CcPerNavigation { get; set; } = null!;
+        public virtual Profesion? IdProfNavigation { get; set; } = null!;
     }
 }

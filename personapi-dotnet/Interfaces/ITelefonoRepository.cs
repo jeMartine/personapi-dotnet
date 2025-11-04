@@ -6,8 +6,11 @@ namespace personapi_dotnet.Interfaces
     {
         bool TelefonoExists(string id);
         Telefono GetTelefonoById(string id);
-        ICollection<Telefono> GetTelefonos();
+        Task<Telefono?> GetTelefonoByIdAsync(string id);
+        IEnumerable<Telefono> GetTelefonos();
+        Task<IEnumerable<Telefono>> GetTelefonosAsync();
         void CreateTelefono(Telefono telefono);
+        Task CreateTelefonoAsync(Telefono telefono);
         void UpdateTelefono(Telefono telefono);
         void DeleteTelefono(Telefono telefono);
         bool SaveChanges();

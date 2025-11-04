@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using personapi_dotnet.Data;
 using personapi_dotnet.Models.Entities;
 
 namespace personapi_dotnet.Controllers.ApiControllers

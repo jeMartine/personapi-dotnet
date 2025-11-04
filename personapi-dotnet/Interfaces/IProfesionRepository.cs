@@ -6,8 +6,11 @@ namespace personapi_dotnet.Interfaces
     {
         bool ProfesionExists(int id);
         Profesion GetProfesionById(int id);
-        ICollection<Profesion> GetProfesiones();
+        Task<Profesion?> GetProfesionByIdAsync(int id);
+        IEnumerable<Profesion> GetProfesiones();
+        Task<IEnumerable<Profesion>> GetProfesionesAsync();
         void CreateProfesion(Profesion profesion);
+        Task CreateProfesionAsync(Profesion profesion);
         void UpdateProfesion(Profesion profesion);
         void DeleteProfesion(Profesion profesion);
         bool SaveChanges();

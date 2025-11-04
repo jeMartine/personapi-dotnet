@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using personapi_dotnet.Models.Entities;
 
-namespace personapi_dotnet.Models.Entities
+namespace personapi_dotnet.Data
 {
     public partial class persona_dbContext : DbContext
     {

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using personapi_dotnet.Models.Entities;
+using personapi_dotnet.Data;
 using personapi_dotnet.Interfaces;
 using personapi_dotnet.Repositories;
 

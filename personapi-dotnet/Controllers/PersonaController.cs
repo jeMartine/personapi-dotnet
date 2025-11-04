@@ -5,41 +5,38 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using personapi_dotnet.Interfaces;
 using personapi_dotnet.Models.Entities;
 
 namespace personapi_dotnet.Controllers
 {
     public class PersonaController : Controller
     {
-        private readonly persona_dbContext _context;
+        private readonly IPersonaRepository _personaRepo;
 
-        public PersonaController(persona_dbContext context)
+        public PersonaController(IPersonaRepository personaRepo)
         {
-            _context = context;
+            _personaRepo = personaRepo;
         }
 
         // GET: Persona
         public async Task<IActionResult> Index()
         {
-            var personas = await _context.Personas
-                .Include(p => p.Estudios)
-                .Include(p => p.Telefonos)
-                .ToListAsync();
-
-            ViewBag.TotalPersonas = personas.Count;
+            var personas = await _personaRepo.GetPersonasAsync();
+            ViewBag.TotalPersonas = personas.Count();
             return View(personas);
         }
 
         // GET: Persona/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Personas == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var persona = await _context.Personas
-                .FirstOrDefaultAsync(m => m.Cc == id);
+            var persona = await _personaRepo.GetPersonaByIdAsync(id.Value);
+
             if (persona == null)
             {
                 return NotFound();
@@ -63,8 +60,7 @@ namespace personapi_dotnet.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(persona);
-                await _context.SaveChangesAsync();
+                await _personaRepo.CreatePersonaAsync(persona);
                 return RedirectToAction(nameof(Index));
             }
             return View(persona);
@@ -73,12 +69,13 @@ namespace personapi_dotnet.Controllers
         // GET: Persona/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Personas == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var persona = await _context.Personas.FindAsync(id);
+            var persona = await _personaRepo.GetPersonaByIdAsync(id.Value);
+
             if (persona == null)
             {
                 return NotFound();
@@ -102,12 +99,12 @@ namespace personapi_dotnet.Controllers
             {
                 try
                 {
-                    _context.Update(persona);
-                    await _context.SaveChangesAsync();
+                    _personaRepo.UpdatePersona(persona);
+                    _personaRepo.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PersonaExists(persona.Cc))
+                    if (!_personaRepo.PersonaExists(persona.Cc))
                     {
                         return NotFound();
                     }
@@ -124,13 +121,13 @@ namespace personapi_dotnet.Controllers
         // GET: Persona/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Personas == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var persona = await _context.Personas
-                .FirstOrDefaultAsync(m => m.Cc == id);
+            var persona = await _personaRepo.GetPersonaByIdAsync(id.Value);
+
             if (persona == null)
             {
                 return NotFound();
@@ -144,23 +141,15 @@ namespace personapi_dotnet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Personas == null)
-            {
-                return Problem("Entity set 'persona_dbContext.Personas'  is null.");
-            }
-            var persona = await _context.Personas.FindAsync(id);
+            var persona = await _personaRepo.GetPersonaByIdAsync(id);
+
             if (persona != null)
             {
-                _context.Personas.Remove(persona);
+                _personaRepo.DeletePersona(persona);
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool PersonaExists(int id)
-        {
-          return (_context.Personas?.Any(e => e.Cc == id)).GetValueOrDefault();
+            _personaRepo.SaveChanges();
+            return RedirectToAction(nameof(Index));
         }
     }
 }
