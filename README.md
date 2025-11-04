@@ -1,6 +1,5 @@
 # Lab 1 Arqui - Persona API con SQL Server
-
-Este proyecto contiene una API en .NET 7 (`personapi-dotnet`) conectada a una base de datos SQL Server, con Docker Compose para levantar ambos servicios de manera sencilla.
+En este laboratorio tiene como objetivo la implementación de una aplicación monolítica utilizando el patrón Modelo-Vista-Controlador (MVC) junto con el patrón Data Access Object (DAO), usando el stack tecnológico de .NET 7, MS SQL Server 2022 y servicios REST documentados con Swagger 3, además con Docker Compose se pueden levantar ambos servicios de manera sencilla.
 
 ## Archivos DDL y DML
   - [persona DDl](https://github.com/jeMartine/personapi-dotnet/blob/main/ddl_persona_db.sql)
