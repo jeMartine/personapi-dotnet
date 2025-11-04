@@ -56,4 +56,11 @@ docker-compose down -v
 - La API usa la conexión:  
   `Server=sqlserver,1433;Database=persona_db;User Id=sa;Password=Admin123!;TrustServerCertificate=True;`  
 - SQL Server se inicializa automáticamente gracias al script `init-db.sh`.
+- Si se presenta este error con `init-db.sh`.
+  ```bash
+  docker_sqlserver  | /bin/bash: /scripts/init-db.sh: /bin/bash^M: bad interpreter: No such file or directory dependency failed to start: container docker_sqlserver exited (126)
+  ```
+  Se recomienda abrir el archivo en Visual Studio Code o en algun editor que permita el cambio de salto de línea de `CRLF` a `lF`
+  <img width="139" height="71" alt="image" src="https://github.com/user-attachments/assets/32e3c2e2-e16e-4749-9d4a-9f675bf41b30" />
 
+  
